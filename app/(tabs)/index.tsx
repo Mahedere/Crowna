@@ -1,11 +1,16 @@
 import React from 'react';
-import { StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, Image } from 'react-native';
-import { Text, View } from '@/components/Themed';
-import { Calendar, CheckCircle, ChevronRight, X } from 'lucide-react-native';
+import { StyleSheet, SafeAreaView, ScrollView, View, Text } from 'react-native';
 import { router } from 'expo-router';
-import { useAppStore } from '@/lib/store';
+import { Sparkles, Droplet } from 'lucide-react-native';
 
-export default function PlannerScreen() {
+import { useAppStore } from '@/lib/store';
+import { COLORS, SPACING, TYPOGRAPHY, RADIUS } from '@/constants/theme';
+import { StyleCard } from '@/components/ui/StyleCard';
+import { ScheduleCard } from '@/components/ui/ScheduleCard';
+import { PrimaryButton } from '@/components/ui/PrimaryButton';
+import { SectionHeader } from '@/components/ui/SectionHeader';
+
+export default function HomeScreen() {
   const schedule = useAppStore((state) => state.schedule);
   const completeCurrentStyle = useAppStore((state) => state.completeCurrentStyle);
 
@@ -15,75 +20,97 @@ export default function PlannerScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         
+        <View style={styles.header}>
+          <Text style={styles.greeting}>Good morning, Sarah 👑</Text>
+          <Text style={styles.tagline}>Your hair, your crown.</Text>
+        </View>
+
         {/* CURRENT STYLE */}
         {current && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>CURRENT</Text>
-            <View style={styles.card}>
-              <View style={styles.cardHeader}>
-                <View>
-                  <Text style={styles.styleName}>{current.style.name}</Text>
-                  <Text style={styles.dateText}>{current.startDate} - {current.endDate}</Text>
-                </View>
-                <TouchableOpacity style={styles.actionButton} onPress={completeCurrentStyle}>
-                  <CheckCircle color="#4CAF50" size={24} />
-                  <Text style={styles.actionText}>Complete</Text>
-                </TouchableOpacity>
-              </View>
+            <SectionHeader title="Your Current Style" />
+            <StyleCard 
+              styleData={current.style}
+              onPress={() => router.push('/history')} // Placeholder for now
+              size="large"
+            />
+            <View style={styles.currentMeta}>
+              <Text style={styles.currentDate}>Started {current.startDate}</Text>
+              <Text style={styles.currentRemaining}>12 days remaining</Text>
             </View>
+            <PrimaryButton 
+              label="Mark Completed" 
+              onPress={completeCurrentStyle} 
+              variant="secondary"
+              style={{ marginTop: SPACING.md }}
+            />
           </View>
         )}
 
         {/* NEXT STYLE */}
         {next && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>NEXT</Text>
-            <View style={[styles.card, styles.nextCard]}>
-              <View style={styles.cardHeader}>
-                <View>
-                  <Text style={styles.styleName}>{next.style.name}</Text>
-                  <Text style={styles.dateText}>{next.startDate} - {next.endDate}</Text>
-                </View>
-                <View style={styles.optionsBadge}>
-                  <Text style={styles.optionsText}>10 options available</Text>
-                </View>
+            <SectionHeader title="Your Next Style" />
+            <View style={styles.nextRecommendationCard}>
+              <View style={styles.recommendationHeader}>
+                <Sparkles color={COLORS.primary} size={20} />
+                <Text style={styles.recommendationTitle}>94% match for you</Text>
+              </View>
+              <Text style={styles.recommendationText}>
+                {next.style.whyItMatches || 'Matches your hair texture, preferred maintenance level, and lifestyle.'}
+              </Text>
+              
+              <View style={styles.nextCardWrapper}>
+                <ScheduleCard 
+                  slot={next}
+                  onPress={() => {}} 
+                  variant="next"
+                />
               </View>
               
-              <View style={styles.actionsRow}>
-                <TouchableOpacity style={[styles.smallButton, styles.primaryButton]}>
-                  <Text style={styles.primaryButtonText}>Accept</Text>
-                </TouchableOpacity>
-                <TouchableOpacity 
-                  style={[styles.smallButton, styles.secondaryButton]}
-                  onPress={() => router.push('/options-modal')}
-                >
-                  <Text style={styles.secondaryButtonText}>View Options (10)</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.iconButton}>
-                  <X color="#666" size={20} />
-                </TouchableOpacity>
+              <View style={styles.nextActions}>
+                <PrimaryButton 
+                  label="View Alternatives (10)" 
+                  onPress={() => router.push('/options-modal')} 
+                  variant="outline"
+                  style={styles.actionBtn}
+                />
               </View>
             </View>
           </View>
         )}
 
-        {/* UPCOMING STYLE */}
+        {/* COMING UP */}
         {upcoming && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>UPCOMING</Text>
-            <View style={[styles.card, styles.upcomingCard]}>
-              <View style={styles.cardHeader}>
-                <View>
-                  <Text style={styles.styleName}>{upcoming.style.name}</Text>
-                  <Text style={styles.dateText}>{upcoming.startDate} - {upcoming.endDate}</Text>
-                </View>
-                <ChevronRight color="#ccc" size={24} />
-              </View>
-            </View>
+            <SectionHeader 
+              title="Coming Up" 
+              actionLabel="View Calendar" 
+              onActionPress={() => {}} 
+            />
+            <ScheduleCard 
+              slot={upcoming}
+              onPress={() => {}} 
+              variant="upcoming"
+            />
           </View>
         )}
+
+        {/* HAIR CARE (FUTURE READY) */}
+        <View style={[styles.section, styles.lastSection]}>
+          <SectionHeader title="Hair Care" />
+          <View style={styles.careCard}>
+            <View style={styles.careIconWrapper}>
+              <Droplet color={COLORS.primary} size={24} />
+            </View>
+            <View style={styles.careTextContainer}>
+              <Text style={styles.careTitle}>Wash Day Routine</Text>
+              <Text style={styles.careSubtitle}>Coming soon to Crowna</Text>
+            </View>
+          </View>
+        </View>
 
       </ScrollView>
     </SafeAreaView>
@@ -93,113 +120,102 @@ export default function PlannerScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f8f8',
+    backgroundColor: COLORS.background,
   },
   scrollContent: {
-    padding: 16,
-    paddingBottom: 40,
+    padding: SPACING.lg,
+    paddingTop: SPACING.xl,
+  },
+  header: {
+    marginBottom: SPACING.xxl,
+  },
+  greeting: {
+    ...TYPOGRAPHY.h1,
+    marginBottom: SPACING.xs,
+  },
+  tagline: {
+    ...TYPOGRAPHY.bodyLarge,
+    color: COLORS.textMuted,
   },
   section: {
-    marginBottom: 24,
-    backgroundColor: 'transparent',
+    marginBottom: SPACING.xxl,
   },
-  sectionTitle: {
-    fontSize: 12,
-    fontWeight: 'bold',
-    color: '#888',
-    letterSpacing: 1.2,
-    marginBottom: 8,
-    marginLeft: 4,
+  lastSection: {
+    marginBottom: SPACING.xl * 2,
   },
-  card: {
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  nextCard: {
-    borderColor: '#1a1a1a',
-    borderWidth: 1.5,
-  },
-  upcomingCard: {
-    opacity: 0.7,
-  },
-  cardHeader: {
+  currentMeta: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    backgroundColor: 'transparent',
+    marginTop: SPACING.md,
+    paddingHorizontal: SPACING.xs,
   },
-  styleName: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#1a1a1a',
-    marginBottom: 4,
+  currentDate: {
+    ...TYPOGRAPHY.body,
+    color: COLORS.textMuted,
   },
-  dateText: {
-    fontSize: 14,
-    color: '#666',
-  },
-  actionButton: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  actionText: {
-    fontSize: 12,
-    color: '#4CAF50',
-    fontWeight: '600',
-    marginTop: 4,
-  },
-  optionsBadge: {
-    backgroundColor: '#e6f4fe',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  optionsText: {
-    fontSize: 12,
-    color: '#007AFF',
+  currentRemaining: {
+    ...TYPOGRAPHY.body,
+    color: COLORS.primary,
     fontWeight: '600',
   },
-  actionsRow: {
+  nextRecommendationCard: {
+    backgroundColor: COLORS.surface,
+    padding: SPACING.lg,
+    borderRadius: RADIUS.xl,
+    borderWidth: 1,
+    borderColor: COLORS.primaryLight,
+  },
+  recommendationHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 16,
-    gap: 8,
-    backgroundColor: 'transparent',
+    gap: SPACING.sm,
+    marginBottom: SPACING.sm,
   },
-  smallButton: {
-    flex: 1,
-    paddingVertical: 10,
-    borderRadius: 8,
+  recommendationTitle: {
+    ...TYPOGRAPHY.h3,
+    color: COLORS.primary,
+  },
+  recommendationText: {
+    ...TYPOGRAPHY.body,
+    color: COLORS.textMuted,
+    marginBottom: SPACING.lg,
+    lineHeight: 22,
+  },
+  nextCardWrapper: {
+    marginBottom: SPACING.lg,
+  },
+  nextActions: {
+    marginTop: SPACING.xs,
+  },
+  actionBtn: {
+    width: '100%',
+  },
+  careCard: {
+    flexDirection: 'row',
     alignItems: 'center',
+    backgroundColor: COLORS.surface,
+    padding: SPACING.md,
+    borderRadius: RADIUS.lg,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    borderStyle: 'dashed',
+    gap: SPACING.md,
   },
-  primaryButton: {
-    backgroundColor: '#1a1a1a',
+  careIconWrapper: {
+    backgroundColor: COLORS.primaryLight,
+    padding: SPACING.md,
+    borderRadius: RADIUS.md,
   },
-  primaryButtonText: {
-    color: '#fff',
-    fontWeight: '600',
-    fontSize: 14,
+  careTextContainer: {
+    flex: 1,
   },
-  secondaryButton: {
-    backgroundColor: '#f0f0f0',
+  careTitle: {
+    ...TYPOGRAPHY.h3,
+    marginBottom: 4,
   },
-  secondaryButtonText: {
-    color: '#1a1a1a',
-    fontWeight: '600',
-    fontSize: 14,
-  },
-  iconButton: {
-    padding: 10,
-    backgroundColor: '#f0f0f0',
-    borderRadius: 8,
+  careSubtitle: {
+    ...TYPOGRAPHY.body,
+    color: COLORS.textMuted,
   },
 });
 

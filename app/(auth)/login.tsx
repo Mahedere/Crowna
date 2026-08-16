@@ -1,45 +1,17 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, TextInput, TouchableOpacity, Alert, SafeAreaView } from 'react-native';
-import { supabase } from '@/lib/supabase';
+import { StyleSheet, View, Text, TextInput, SafeAreaView, KeyboardAvoidingView, Platform, ImageBackground } from 'react-native';
 import { router } from 'expo-router';
+import { PrimaryButton } from '@/components/ui/PrimaryButton';
+import { COLORS, SPACING, TYPOGRAPHY, RADIUS } from '@/constants/theme';
+import { LinearGradient } from 'expo-linear-gradient';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
-  async function signInWithEmail() {
+  async function handleAuth() {
     setLoading(true);
-    // Dummy login logic for now since Supabase isn't fully configured
-    // const { error } = await supabase.auth.signInWithPassword({
-    //   email: email,
-    //   password: password,
-    // });
-    
-    // if (error) Alert.alert(error.message);
-    // else router.replace('/(onboarding)');
-    
-    // Mock login success
-    setTimeout(() => {
-      setLoading(false);
-      router.replace('/(onboarding)');
-    }, 1000);
-  }
-
-  async function signUpWithEmail() {
-    setLoading(true);
-    // const {
-    //   data: { session },
-    //   error,
-    // } = await supabase.auth.signUp({
-    //   email: email,
-    //   password: password,
-    // });
-
-    // if (error) Alert.alert(error.message);
-    // else if (!session) Alert.alert('Please check your inbox for email verification!');
-    
-    // Mock signup success
     setTimeout(() => {
       setLoading(false);
       router.replace('/(onboarding)');
@@ -47,103 +19,116 @@ export default function LoginScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        <Text style={styles.title}>Crowna</Text>
-        <Text style={styles.subtitle}>Your hair, your crown.</Text>
+    <ImageBackground
+      source={{ uri: 'https://images.unsplash.com/photo-1595475207225-428b62bda831?auto=format&fit=crop&w=800&q=80' }}
+      style={styles.backgroundImage}
+    >
+      <LinearGradient
+        colors={['rgba(0,0,0,0.1)', 'rgba(0,0,0,0.8)']}
+        style={StyleSheet.absoluteFill}
+      />
+      
+      <SafeAreaView style={styles.container}>
+        <KeyboardAvoidingView 
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={styles.content}
+        >
+          <View style={styles.header}>
+            <Text style={styles.title}>Crowna</Text>
+            <Text style={styles.subtitle}>Your hair, your crown.</Text>
+          </View>
 
-        <View style={styles.inputContainer}>
-          <TextInput
-            style={styles.input}
-            onChangeText={(text) => setEmail(text)}
-            value={email}
-            placeholder="Email"
-            placeholderTextColor="#888"
-            autoCapitalize="none"
-          />
-          <TextInput
-            style={styles.input}
-            onChangeText={(text) => setPassword(text)}
-            value={password}
-            secureTextEntry={true}
-            placeholder="Password"
-            placeholderTextColor="#888"
-            autoCapitalize="none"
-          />
-        </View>
+          <View style={styles.formContainer}>
+            <TextInput
+              style={styles.input}
+              onChangeText={setEmail}
+              value={email}
+              placeholder="Email address"
+              placeholderTextColor={COLORS.textMuted}
+              autoCapitalize="none"
+              keyboardType="email-address"
+            />
+            <TextInput
+              style={styles.input}
+              onChangeText={setPassword}
+              value={password}
+              secureTextEntry
+              placeholder="Password"
+              placeholderTextColor={COLORS.textMuted}
+            />
 
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.buttonPrimary} onPress={signInWithEmail} disabled={loading}>
-            <Text style={styles.buttonTextPrimary}>Sign in</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.buttonSecondary} onPress={signUpWithEmail} disabled={loading}>
-            <Text style={styles.buttonTextSecondary}>Sign up</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </SafeAreaView>
+            <PrimaryButton 
+              label={loading ? "Loading..." : "Sign in to your account"} 
+              onPress={handleAuth}
+              style={styles.buttonPrimary}
+              textStyle={styles.buttonPrimaryText}
+            />
+            
+            <PrimaryButton 
+              label="Create an account" 
+              onPress={handleAuth}
+              variant="outline"
+              style={styles.buttonSecondary}
+              textStyle={styles.buttonSecondaryText}
+            />
+          </View>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
+  backgroundImage: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
+  },
   container: {
     flex: 1,
-    backgroundColor: '#fff',
   },
   content: {
     flex: 1,
-    justifyContent: 'center',
-    padding: 24,
+    justifyContent: 'flex-end',
+    padding: SPACING.xl,
+    paddingBottom: SPACING.xxl * 1.5,
+  },
+  header: {
+    marginBottom: SPACING.xxl,
   },
   title: {
-    fontSize: 42,
-    fontWeight: 'bold',
-    color: '#1a1a1a',
-    textAlign: 'center',
-    marginBottom: 8,
+    ...TYPOGRAPHY.h1,
+    fontSize: 48,
+    color: COLORS.surface,
+    marginBottom: SPACING.xs,
   },
   subtitle: {
-    fontSize: 18,
-    color: '#666',
-    textAlign: 'center',
-    marginBottom: 48,
+    ...TYPOGRAPHY.h3,
+    color: COLORS.surface,
+    opacity: 0.9,
+    fontWeight: '400',
   },
-  inputContainer: {
-    gap: 16,
-    marginBottom: 32,
+  formContainer: {
+    gap: SPACING.md,
   },
   input: {
-    backgroundColor: '#f5f5f5',
-    padding: 16,
-    borderRadius: 12,
-    fontSize: 16,
-    color: '#1a1a1a',
-  },
-  buttonContainer: {
-    gap: 12,
+    backgroundColor: 'rgba(255,255,255,0.95)',
+    padding: SPACING.lg,
+    borderRadius: RADIUS.md,
+    ...TYPOGRAPHY.bodyLarge,
+    color: COLORS.text,
   },
   buttonPrimary: {
-    backgroundColor: '#1a1a1a',
-    padding: 16,
-    borderRadius: 12,
-    alignItems: 'center',
+    marginTop: SPACING.sm,
+    backgroundColor: COLORS.primary,
   },
-  buttonTextPrimary: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
+  buttonPrimaryText: {
+    color: COLORS.surface,
   },
   buttonSecondary: {
-    backgroundColor: 'transparent',
-    padding: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#1a1a1a',
+    borderColor: 'rgba(255,255,255,0.5)',
   },
-  buttonTextSecondary: {
-    color: '#1a1a1a',
-    fontSize: 16,
-    fontWeight: '600',
+  buttonSecondaryText: {
+    color: COLORS.surface,
   },
 });

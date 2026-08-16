@@ -3,21 +3,14 @@ import { StyleSheet, FlatList, TouchableOpacity, SafeAreaView } from 'react-nati
 import { Text, View } from '@/components/Themed';
 import { CheckCircle2 } from 'lucide-react-native';
 import { router } from 'expo-router';
-import { useAppStore, Hairstyle } from '@/lib/store';
+import { useAppStore } from '@/lib/store';
+import { MOCK_HAIRSTYLES } from '@/lib/mockHairstyles';
 
 // 10 Alternative options as requested by user
-const ALTERNATIVES: Hairstyle[] = [
-  { id: 'alt1', name: 'Natural Twist-out', category: 'Natural', matchScore: '98%', duration: '3-7 days', difficulty: 'Easy', hasTutorial: true },
-  { id: 'alt2', name: 'Bantu Knots', category: 'Natural', matchScore: '95%', duration: '3-5 days', difficulty: 'Moderate', hasTutorial: true },
-  { id: 'alt3', name: 'Mini Twists', category: 'Twists', matchScore: '92%', duration: '2-3 weeks', difficulty: 'Advanced', hasTutorial: true },
-  { id: 'alt4', name: 'Flat Twists', category: 'Twists', matchScore: '89%', duration: '1-2 weeks', difficulty: 'Moderate', hasTutorial: true },
-  { id: 'alt5', name: 'Wash and Go', category: 'Natural', matchScore: '85%', duration: '3-5 days', difficulty: 'Easy', hasTutorial: true },
-  { id: 'alt6', name: 'High Puff', category: 'Natural', matchScore: '82%', duration: '1-3 days', difficulty: 'Easy', hasTutorial: true },
-  { id: 'alt7', name: 'Halo Braid', category: 'Braids', matchScore: '78%', duration: '4-7 days', difficulty: 'Advanced', hasTutorial: true },
-  { id: 'alt8', name: 'Space Buns', category: 'Natural', matchScore: '75%', duration: '2-4 days', difficulty: 'Easy', hasTutorial: true },
-  { id: 'alt9', name: 'Cornrows to the back', category: 'Braids', matchScore: '72%', duration: '1-2 weeks', difficulty: 'Moderate', hasTutorial: false },
-  { id: 'alt10', name: 'Faux Locs', category: 'Locs', matchScore: '70%', duration: '4-6 weeks', difficulty: 'Advanced', hasTutorial: false },
-];
+const ALTERNATIVES: HairstyleData[] = MOCK_HAIRSTYLES.map((style, index) => ({
+  ...style,
+  matchScore: `${98 - index * 3}%` // Fake descending match score
+}));
 
 export default function OptionsModal() {
   const replaceNextStyle = useAppStore((state) => state.replaceNextStyle);

@@ -22,17 +22,8 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Planner',
+          title: 'Home',
           tabBarIcon: ({ color }) => <Calendar color={color} size={24} />,
-          headerRight: () => (
-            <Link href="/modal" asChild>
-              <Pressable style={{ marginRight: 15 }}>
-                {({ pressed }) => (
-                  <Settings color="#1a1a1a" size={24} style={{ opacity: pressed ? 0.5 : 1 }} />
-                )}
-              </Pressable>
-            </Link>
-          ),
         }}
       />
       <Tabs.Screen
