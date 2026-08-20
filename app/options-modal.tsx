@@ -1,21 +1,23 @@
 import React from 'react';
-import { StyleSheet, FlatList, TouchableOpacity, SafeAreaView } from 'react-native';
-import { Text, View } from '@/components/Themed';
-import { CheckCircle2 } from 'lucide-react-native';
+import {
+  StyleSheet, FlatList, TouchableOpacity, SafeAreaView,
+  View, Text, Image,
+} from 'react-native';
 import { router } from 'expo-router';
+import { Sparkles } from 'lucide-react-native';
 import { useAppStore } from '@/lib/store';
-import { MOCK_HAIRSTYLES } from '@/lib/mockHairstyles';
+import { MOCK_HAIRSTYLES, HairstyleData } from '@/lib/mockHairstyles';
+import { COLORS, SPACING, TYPOGRAPHY, RADIUS, SHADOWS } from '@/constants/theme';
 
-// 10 Alternative options as requested by user
-const ALTERNATIVES: HairstyleData[] = MOCK_HAIRSTYLES.map((style, index) => ({
+const ALTERNATIVES: HairstyleData[] = MOCK_HAIRSTYLES.map((style, i) => ({
   ...style,
-  matchScore: `${98 - index * 3}%` // Fake descending match score
+  matchScore: `${98 - i * 3}%`,
 }));
 
 export default function OptionsModal() {
-  const replaceNextStyle = useAppStore((state) => state.replaceNextStyle);
+  const replaceNextStyle = useAppStore((s) => s.replaceNextStyle);
 
-  const handleSelect = (item: Hairstyle) => {
+  const handleSelect = (item: HairstyleData) => {
     replaceNextStyle(item);
     router.back();
   };
@@ -23,27 +25,28 @@ export default function OptionsModal() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Alternative Options</Text>
-        <Text style={styles.subtitle}>Select a replacement for this schedule slot</Text>
+        <Text style={styles.title}>More styles for you</Text>
+        <Text style={styles.subtitle}>Not feeling this one? We picked these based on your profile.</Text>
       </View>
 
       <FlatList
         data={ALTERNATIVES}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.listContent}
+        keyExtractor={(i) => i.id}
+        contentContainerStyle={styles.list}
+        showsVerticalScrollIndicator={false}
         renderItem={({ item, index }) => (
-          <TouchableOpacity style={styles.optionCard} onPress={() => handleSelect(item)}>
-            <View style={styles.optionInfo}>
-              <View style={styles.rankContainer}>
-                <Text style={styles.rankText}>#{index + 1}</Text>
+          <TouchableOpacity style={styles.card} onPress={() => handleSelect(item)} activeOpacity={0.8}>
+            <Image source={{ uri: item.image }} style={styles.thumb} />
+            <View style={styles.info}>
+              <View style={styles.matchRow}>
+                <Sparkles color={COLORS.gold} size={13} />
+                <Text style={styles.match}>{item.matchScore} match</Text>
               </View>
-              <View>
-                <Text style={styles.styleName}>{item.name}</Text>
-                <Text style={styles.metaText}>{item.matchScore} Match • {item.duration}</Text>
-              </View>
+              <Text style={styles.name} numberOfLines={1}>{item.name}</Text>
+              <Text style={styles.reason} numberOfLines={2}>{item.whyItMatches ?? 'Great fit for your hair profile.'}</Text>
             </View>
-            <View style={styles.selectButton}>
-              <Text style={styles.selectText}>Select</Text>
+            <View style={styles.pickBtn}>
+              <Text style={styles.pickText}>Pick</Text>
             </View>
           </TouchableOpacity>
         )}
@@ -53,77 +56,33 @@ export default function OptionsModal() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
+  container: { flex: 1, backgroundColor: COLORS.background },
   header: {
-    padding: 20,
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    padding: SPACING.lg, paddingTop: SPACING.xl,
+    borderBottomWidth: 1, borderBottomColor: COLORS.border,
   },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#1a1a1a',
-    marginBottom: 4,
+  title:    { ...TYPOGRAPHY.h2, marginBottom: SPACING.xs },
+  subtitle: { ...TYPOGRAPHY.body },
+
+  list: { padding: SPACING.lg, gap: SPACING.md, paddingBottom: 60 },
+
+  card: {
+    flexDirection: 'row', alignItems: 'center',
+    backgroundColor: COLORS.surface, borderRadius: RADIUS.lg,
+    padding: SPACING.sm, gap: SPACING.md,
+    borderWidth: 1, borderColor: COLORS.border, ...SHADOWS.sm,
   },
-  subtitle: {
-    fontSize: 16,
-    color: '#666',
+  thumb:    { width: 70, height: 70, borderRadius: RADIUS.md, backgroundColor: COLORS.surfaceAlt },
+  info:     { flex: 1 },
+  matchRow: { flexDirection: 'row', alignItems: 'center', gap: 5, marginBottom: 4 },
+  match:    { ...TYPOGRAPHY.caption, color: COLORS.gold, fontWeight: '700' },
+  name:     { ...TYPOGRAPHY.h3, fontSize: 15, marginBottom: 4 },
+  reason:   { ...TYPOGRAPHY.caption, color: COLORS.textMuted, lineHeight: 17 },
+
+  pickBtn: {
+    backgroundColor: COLORS.primaryLight, borderRadius: RADIUS.round,
+    paddingHorizontal: SPACING.md, paddingVertical: SPACING.sm,
+    borderWidth: 1, borderColor: 'rgba(255,107,53,0.3)',
   },
-  listContent: {
-    padding: 16,
-    gap: 12,
-  },
-  optionCard: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 16,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
-    backgroundColor: '#fff',
-  },
-  optionInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  rankContainer: {
-    backgroundColor: '#f5f5f5',
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  rankText: {
-    fontSize: 12,
-    fontWeight: 'bold',
-    color: '#666',
-  },
-  styleName: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#1a1a1a',
-    marginBottom: 2,
-  },
-  metaText: {
-    fontSize: 12,
-    color: '#666',
-  },
-  selectButton: {
-    backgroundColor: '#e6f4fe',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-  },
-  selectText: {
-    fontSize: 12,
-    fontWeight: 'bold',
-    color: '#007AFF',
-  },
+  pickText: { ...TYPOGRAPHY.caption, color: COLORS.primary, fontWeight: '700' },
 });

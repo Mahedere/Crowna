@@ -1,43 +1,45 @@
-import { Link, Tabs } from 'expo-router';
-import { Pressable, StyleSheet } from 'react-native';
-import { Calendar, BookOpen, History, Settings } from 'lucide-react-native';
-
-import Colors from '@/constants/Colors';
-import { useColorScheme } from '@/components/useColorScheme';
-import { useClientOnlyValue } from '@/components/useClientOnlyValue';
+import { Tabs } from 'expo-router';
+import { StyleSheet, View, Platform } from 'react-native';
+import { Home, Compass, CalendarDays } from 'lucide-react-native';
+import { COLORS, RADIUS } from '@/constants/theme';
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: '#1a1a1a',
-        tabBarInactiveTintColor: '#888',
-        headerShown: useClientOnlyValue(false, true),
+        tabBarActiveTintColor:   COLORS.primary,
+        tabBarInactiveTintColor: COLORS.textMuted,
+        headerShown: false,
         tabBarStyle: styles.tabBar,
-        headerStyle: styles.header,
-        headerTitleStyle: styles.headerTitle,
-      }}>
+        tabBarLabelStyle: styles.label,
+        tabBarBackground: () => <View style={styles.tabBarBg} />,
+      }}
+    >
       <Tabs.Screen
         name="index"
         options={{
           title: 'Home',
-          tabBarIcon: ({ color }) => <Calendar color={color} size={24} />,
+          tabBarIcon: ({ color, focused }) => (
+            <Home color={color} size={22} strokeWidth={focused ? 2.5 : 1.8} />
+          ),
         }}
       />
       <Tabs.Screen
         name="library"
         options={{
-          title: 'Library',
-          tabBarIcon: ({ color }) => <BookOpen color={color} size={24} />,
+          title: 'Discover',
+          tabBarIcon: ({ color, focused }) => (
+            <Compass color={color} size={22} strokeWidth={focused ? 2.5 : 1.8} />
+          ),
         }}
       />
       <Tabs.Screen
         name="history"
         options={{
           title: 'History',
-          tabBarIcon: ({ color }) => <History color={color} size={24} />,
+          tabBarIcon: ({ color, focused }) => (
+            <CalendarDays color={color} size={22} strokeWidth={focused ? 2.5 : 1.8} />
+          ),
         }}
       />
     </Tabs>
@@ -46,23 +48,23 @@ export default function TabLayout() {
 
 const styles = StyleSheet.create({
   tabBar: {
-    backgroundColor: '#fff',
+    backgroundColor: 'transparent',
+    borderTopWidth: 0,
+    elevation: 0,
+    height: Platform.OS === 'ios' ? 78 : 62,
+    paddingBottom: Platform.OS === 'ios' ? 20 : 8,
+    paddingTop: 8,
+    position: 'absolute',
+  },
+  tabBarBg: {
+    flex: 1,
+    backgroundColor: 'rgba(9,9,11,0.92)',
     borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
-    elevation: 0,
-    shadowOpacity: 0,
+    borderTopColor: 'rgba(255,255,255,0.06)',
   },
-  header: {
-    backgroundColor: '#fff',
-    elevation: 0,
-    shadowOpacity: 0,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
-  },
-  headerTitle: {
-    fontWeight: 'bold',
-    fontSize: 20,
-    color: '#1a1a1a',
+  label: {
+    fontSize: 10,
+    fontWeight: '600',
+    letterSpacing: 0.3,
   },
 });
-
