@@ -1,68 +1,154 @@
 import React, { useState } from 'react';
 import {
   StyleSheet, View, Text, TouchableOpacity, SafeAreaView,
-  ScrollView, Image, Dimensions,
+  ScrollView, Dimensions,
 } from 'react-native';
 import { router } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAppStore } from '@/lib/store';
 import { COLORS, SPACING, TYPOGRAPHY, RADIUS } from '@/constants/theme';
+import { ChevronRight } from 'lucide-react-native';
 
-const { width, height } = Dimensions.get('window');
+const { width } = Dimensions.get('window');
 
 const QUESTIONS = [
   {
     id: 'hairType',
-    title: 'What is your\nhair type?',
+    title: 'What is your hair type?',
+    subtitle: 'This helps us find styles that work naturally with your texture.',
     options: [
-      { label: 'Straight', image: 'https://images.unsplash.com/photo-1598555192131-0428d087c0eb?w=600&q=80', emoji: '〜' },
-      { label: 'Wavy',     image: 'https://images.unsplash.com/photo-1580226330058-2921c5b8e907?w=600&q=80', emoji: '≈' },
-      { label: 'Curly',    image: 'https://images.unsplash.com/photo-1582218080072-4660eb00fcb4?w=600&q=80', emoji: '○' },
-      { label: 'Coily',    image: 'https://images.unsplash.com/photo-1615165487779-1ce505b00c3c?w=600&q=80', emoji: '◎' },
+      { label: 'Straight (Type 1)', emoji: '〜' },
+      { label: 'Wavy (Type 2)',     emoji: '≈' },
+      { label: 'Curly (Type 3)',    emoji: '○' },
+      { label: 'Coily (Type 4)',    emoji: '◎' },
     ],
   },
   {
     id: 'hairLength',
-    title: 'How long is\nyour hair?',
+    title: 'How long is your hair?',
+    subtitle: 'Length determines which styles are possible for you right now.',
     options: [
-      { label: 'Short',  image: 'https://images.unsplash.com/photo-1595475207225-428b62bda831?w=600&q=80', emoji: '▪' },
-      { label: 'Medium', image: 'https://images.unsplash.com/photo-1588691535490-252f5dcb3947?w=600&q=80', emoji: '▬' },
-      { label: 'Long',   image: 'https://images.unsplash.com/photo-1615165487779-1ce505b00c3c?w=600&q=80', emoji: '▐' },
+      { label: 'Short (Ear to chin)', emoji: '✂' },
+      { label: 'Medium (Shoulder)', emoji: '📏' },
+      { label: 'Long (Mid-back +)', emoji: '🌊' },
     ],
   },
   {
     id: 'maintenance',
-    title: 'Your preferred\nmaintenance level?',
+    title: 'What is your preferred maintenance level?',
+    subtitle: 'How much time do you want to spend on your hair daily?',
     options: [
-      { label: 'Low',    image: 'https://images.unsplash.com/photo-1531123414708-f5b24479904d?w=600&q=80', emoji: '·' },
-      { label: 'Medium', image: 'https://images.unsplash.com/photo-1588691535490-252f5dcb3947?w=600&q=80', emoji: '··' },
-      { label: 'High',   image: 'https://images.unsplash.com/photo-1615165487779-1ce505b00c3c?w=600&q=80', emoji: '···' },
+      { label: 'Low (Wash & Go)', emoji: '⏱' },
+      { label: 'Medium (Some styling)', emoji: '✨' },
+      { label: 'High (Intricate styles)', emoji: '👑' },
+    ],
+  },
+  {
+    id: 'hairGoal',
+    title: 'What is your main hair goal?',
+    subtitle: 'We will tailor recommendations to help you reach it.',
+    options: [
+      { label: 'Growth & Length Retention', emoji: '🌱' },
+      { label: 'Moisture & Hydration', emoji: '💧' },
+      { label: 'Definition & Volume', emoji: '🌟' },
+      { label: 'Protection (Low Manipulation)', emoji: '🛡' },
+    ],
+  },
+  {
+    id: 'porosity',
+    title: 'Do you know your hair porosity?',
+    subtitle: 'This affects how your hair absorbs and retains moisture.',
+    options: [
+      { label: 'Low (Products sit on top)', emoji: '🌧' },
+      { label: 'Normal (Easy to manage)', emoji: '⚖' },
+      { label: 'High (Absorbs quickly, dries fast)', emoji: '🏜' },
+      { label: 'I am not sure', emoji: '🤔' },
     ],
   },
 ];
 
 export default function OnboardingScreen() {
-  const [step, setStep] = useState(0);
-  const [isFinishing, setIsFinishing] = useState(false);
+  const [step, setStep] = useState(-1); // -1 is Intro, 0-N are questions, N+1 is Signup, N+2 is finishing
   const userProfile = useAppStore((s) => s.userProfile);
   const setProfileAnswer = useAppStore((s) => s.setProfileAnswer);
 
-  const q = QUESTIONS[step];
-  const progress = (step / QUESTIONS.length) * 100;
-
-  const handleSelect = (label: string) => {
-    setProfileAnswer(q.id, label);
+  const handleSelect = (questionId: string, label: string) => {
+    setProfileAnswer(questionId, label);
     setTimeout(() => {
-      if (step < QUESTIONS.length - 1) {
-        setStep(step + 1);
-      } else {
-        setIsFinishing(true);
-        setTimeout(() => router.replace('/(tabs)'), 1800);
-      }
-    }, 380);
+      setStep(step + 1);
+    }, 250);
   };
 
-  if (isFinishing) {
+  const handleFinish = () => {
+    setStep(QUESTIONS.length + 2); // Finishing state
+    setTimeout(() => router.replace('/(tabs)'), 2000);
+  };
+
+  // 1. INTRO SCREEN
+  if (step === -1) {
+    return (
+      <View style={styles.introScreen}>
+        <LinearGradient colors={[COLORS.background, '#1a0a1e', COLORS.background]} style={StyleSheet.absoluteFill} />
+        <SafeAreaView style={styles.introSafe}>
+          <View style={styles.introContent}>
+            <Text style={styles.introEmoji}>👑</Text>
+            <Text style={styles.introTitle}>Welcome to Crowna</Text>
+            <Text style={styles.introSubtitle}>Your hair, your crown.</Text>
+            <Text style={styles.introBody}>
+              Let's get to know your hair so we can build a personalized styling plan just for you.
+            </Text>
+          </View>
+          <TouchableOpacity style={styles.introBtn} onPress={() => setStep(0)} activeOpacity={0.8}>
+            <LinearGradient
+              colors={[COLORS.primary, '#FF8C42']}
+              start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
+              style={styles.introBtnGradient}
+            >
+              <Text style={styles.introBtnText}>Begin Profile</Text>
+              <ChevronRight color={COLORS.white} size={20} />
+            </LinearGradient>
+          </TouchableOpacity>
+        </SafeAreaView>
+      </View>
+    );
+  }
+
+  // 3. SIGNUP / TRIAL SCREEN (After questions)
+  if (step === QUESTIONS.length) {
+    return (
+      <View style={styles.introScreen}>
+        <LinearGradient colors={[COLORS.background, '#2a1a0e', COLORS.background]} style={StyleSheet.absoluteFill} />
+        <SafeAreaView style={styles.introSafe}>
+          <View style={styles.introContent}>
+            <Text style={styles.introEmoji}>✨</Text>
+            <Text style={styles.introTitle}>Profile Complete</Text>
+            <Text style={styles.introSubtitle}>Unlock your personalized recommendations.</Text>
+            <Text style={styles.introBody}>
+              Create a free account to save your profile, track your hair journey, and get smart reminders.
+            </Text>
+
+            <TouchableOpacity style={[styles.introBtn, { width: '100%', marginTop: SPACING.xl }]} onPress={handleFinish} activeOpacity={0.8}>
+              <LinearGradient
+                colors={[COLORS.primary, '#FF8C42']}
+                start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
+                style={styles.introBtnGradient}
+              >
+                <Text style={styles.introBtnText}>Sign Up for Free</Text>
+              </LinearGradient>
+            </TouchableOpacity>
+            
+            <TouchableOpacity style={styles.skipBtn} onPress={handleFinish}>
+              <Text style={styles.skipBtnText}>Continue as Guest (Limited Features)</Text>
+            </TouchableOpacity>
+
+          </View>
+        </SafeAreaView>
+      </View>
+    );
+  }
+
+  // 4. SUCCESS / FINISHING SCREEN
+  if (step === QUESTIONS.length + 2) {
     return (
       <View style={styles.successScreen}>
         <LinearGradient colors={['#09090B', '#1a0a1e', '#09090B']} style={StyleSheet.absoluteFill} />
@@ -76,6 +162,10 @@ export default function OnboardingScreen() {
     );
   }
 
+  // 2. QUESTIONS SCREEN
+  const q = QUESTIONS[step];
+  const progress = ((step + 1) / QUESTIONS.length) * 100;
+
   return (
     <SafeAreaView style={styles.container}>
       {/* Progress bar */}
@@ -85,126 +175,125 @@ export default function OnboardingScreen() {
 
       {/* Step counter */}
       <View style={styles.stepRow}>
-        <Text style={styles.stepText}>{step + 1} of {QUESTIONS.length}</Text>
-        {step > 0 && (
+        <Text style={styles.stepText}>Step {step + 1} of {QUESTIONS.length}</Text>
+        {step > 0 ? (
           <TouchableOpacity onPress={() => setStep(step - 1)}>
+            <Text style={styles.backText}>← Back</Text>
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity onPress={() => setStep(-1)}>
             <Text style={styles.backText}>← Back</Text>
           </TouchableOpacity>
         )}
       </View>
 
-      {/* Question */}
-      <Text style={styles.question}>{q.title}</Text>
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        {/* Question */}
+        <View style={styles.qHeader}>
+          <Text style={styles.question}>{q.title}</Text>
+          <Text style={styles.qSubtitle}>{q.subtitle}</Text>
+        </View>
 
-      {/* Option cards */}
-      <ScrollView
-        contentContainerStyle={[
-          styles.options,
-          q.options.length === 3 && styles.optionsThree,
-        ]}
-        showsVerticalScrollIndicator={false}
-      >
-        {q.options.map((opt) => {
-          const selected = userProfile[q.id] === opt.label;
-          return (
-            <TouchableOpacity
-              key={opt.label}
-              style={[
-                styles.optCard,
-                q.options.length === 3 && styles.optCardWide,
-                selected && styles.optCardSelected,
-              ]}
-              onPress={() => handleSelect(opt.label)}
-              activeOpacity={0.85}
-            >
-              <Image source={{ uri: opt.image }} style={styles.optImage} />
-              <LinearGradient
-                colors={['transparent', 'rgba(0,0,0,0.75)']}
-                style={styles.optGradient}
-              />
-              {selected && (
-                <View style={styles.selectedRing} />
-              )}
-              <Text style={styles.optLabel}>{opt.label}</Text>
-              {selected && (
-                <View style={styles.checkmark}>
-                  <Text style={styles.checkmarkText}>✓</Text>
+        {/* Option list (Text-based, no images) */}
+        <View style={styles.optionsList}>
+          {q.options.map((opt) => {
+            const selected = userProfile[q.id] === opt.label;
+            return (
+              <TouchableOpacity
+                key={opt.label}
+                style={[
+                  styles.optRow,
+                  selected && styles.optRowSelected,
+                ]}
+                onPress={() => handleSelect(q.id, opt.label)}
+                activeOpacity={0.7}
+              >
+                <View style={styles.optRowLeft}>
+                  <Text style={styles.optEmoji}>{opt.emoji}</Text>
+                  <Text style={[styles.optLabel, selected && styles.optLabelSelected]}>{opt.label}</Text>
                 </View>
-              )}
-            </TouchableOpacity>
-          );
-        })}
+                <View style={[styles.radio, selected && styles.radioSelected]}>
+                  {selected && <View style={styles.radioInner} />}
+                </View>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
 }
 
-const CARD_SIZE = (width - SPACING.lg * 2 - SPACING.md) / 2;
-
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.background },
 
+  // Intro Screen
+  introScreen: { flex: 1, backgroundColor: COLORS.background },
+  introSafe: { flex: 1, justifyContent: 'space-between', padding: SPACING.xl },
+  introContent: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  introEmoji: { fontSize: 80, marginBottom: SPACING.lg },
+  introTitle: { ...TYPOGRAPHY.display, color: COLORS.white, textAlign: 'center', marginBottom: SPACING.xs },
+  introSubtitle: { ...TYPOGRAPHY.h2, color: COLORS.primary, textAlign: 'center', marginBottom: SPACING.xl },
+  introBody: { ...TYPOGRAPHY.bodyLarge, color: COLORS.textSecondary, textAlign: 'center', paddingHorizontal: SPACING.md },
+  
+  introBtn: { borderRadius: RADIUS.lg, overflow: 'hidden', marginBottom: SPACING.lg },
+  introBtnGradient: { 
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+    paddingVertical: SPACING.md + 4, gap: SPACING.sm 
+  },
+  introBtnText: { ...TYPOGRAPHY.bodyLarge, color: COLORS.white, fontWeight: '700' },
+  
+  skipBtn: { paddingVertical: SPACING.md, alignItems: 'center' },
+  skipBtnText: { ...TYPOGRAPHY.body, color: COLORS.textMuted, textDecorationLine: 'underline' },
+
+  // Progress
   progressTrack: {
-    height: 2, backgroundColor: COLORS.border, marginHorizontal: SPACING.lg,
-    marginTop: SPACING.md,
+    height: 3, backgroundColor: 'rgba(255,255,255,0.05)', marginHorizontal: SPACING.lg,
+    marginTop: SPACING.md, borderRadius: 2,
   },
   progressFill: {
-    height: '100%', backgroundColor: COLORS.primary, borderRadius: 1,
+    height: '100%', backgroundColor: COLORS.primary, borderRadius: 2,
   },
 
+  // Header
   stepRow: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
     paddingHorizontal: SPACING.lg, paddingTop: SPACING.md, paddingBottom: SPACING.xs,
   },
-  stepText: { ...TYPOGRAPHY.caption, color: COLORS.textMuted },
+  stepText: { ...TYPOGRAPHY.caption, color: COLORS.primary, fontWeight: '700', letterSpacing: 1 },
   backText:  { ...TYPOGRAPHY.caption, color: COLORS.textSecondary },
 
-  question: {
-    ...TYPOGRAPHY.display,
-    paddingHorizontal: SPACING.lg,
-    paddingVertical: SPACING.lg,
-  },
+  scrollContent: { paddingBottom: SPACING.xxl },
 
-  options: {
-    flexDirection: 'row', flexWrap: 'wrap',
-    paddingHorizontal: SPACING.lg,
-    gap: SPACING.md,
-    paddingBottom: SPACING.xxl,
-  },
-  optionsThree: { flexDirection: 'column', flexWrap: 'nowrap' },
+  qHeader: { paddingHorizontal: SPACING.lg, paddingVertical: SPACING.xl },
+  question: { ...TYPOGRAPHY.display, color: COLORS.white, marginBottom: SPACING.sm, lineHeight: 44 },
+  qSubtitle: { ...TYPOGRAPHY.bodyLarge, color: COLORS.textSecondary },
 
-  optCard: {
-    width: CARD_SIZE, height: CARD_SIZE * 1.25,
-    borderRadius: RADIUS.lg, overflow: 'hidden',
+  // Text Options
+  optionsList: { paddingHorizontal: SPACING.lg, gap: SPACING.md },
+  optRow: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
     backgroundColor: COLORS.surface,
-  },
-  optCardWide: {
-    width: '100%', height: 90, flexDirection: 'row',
-  },
-  optCardSelected: {
-    borderWidth: 2, borderColor: COLORS.primary,
-  },
-  optImage: { width: '100%', height: '100%' },
-  optGradient: {
-    position: 'absolute', bottom: 0, left: 0, right: 0, height: '55%',
-  },
-
-  selectedRing: {
-    position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-    borderWidth: 2, borderColor: COLORS.primary,
+    padding: SPACING.lg,
     borderRadius: RADIUS.lg,
-    backgroundColor: 'rgba(255,107,53,0.12)',
+    borderWidth: 1, borderColor: COLORS.border,
   },
-  optLabel: {
-    position: 'absolute', bottom: SPACING.md, left: SPACING.md,
-    ...TYPOGRAPHY.h3, color: COLORS.white,
+  optRowSelected: {
+    borderColor: COLORS.primary,
+    backgroundColor: 'rgba(255,107,53,0.05)',
   },
-  checkmark: {
-    position: 'absolute', top: SPACING.sm, right: SPACING.sm,
-    width: 26, height: 26, borderRadius: 13,
-    backgroundColor: COLORS.primary, alignItems: 'center', justifyContent: 'center',
+  optRowLeft: { flexDirection: 'row', alignItems: 'center', gap: SPACING.md },
+  optEmoji: { fontSize: 24 },
+  optLabel: { ...TYPOGRAPHY.h3, color: COLORS.white, fontSize: 16 },
+  optLabelSelected: { color: COLORS.primary },
+  
+  radio: {
+    width: 24, height: 24, borderRadius: 12,
+    borderWidth: 2, borderColor: COLORS.textMuted,
+    alignItems: 'center', justifyContent: 'center',
   },
-  checkmarkText: { color: COLORS.white, fontWeight: '800', fontSize: 13 },
+  radioSelected: { borderColor: COLORS.primary },
+  radioInner: { width: 12, height: 12, borderRadius: 6, backgroundColor: COLORS.primary },
 
   // Success screen
   successScreen: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: SPACING.xl },
